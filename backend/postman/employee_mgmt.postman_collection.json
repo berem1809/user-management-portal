@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "a4f942b2-6c74-4a12-b5c1-d0c9d2c9cd1f",
+    "name": "User Management Portal API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const data = pm.response.json();",
+              "  pm.environment.set('pending_token', data.pending_token);",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@venturit.com\",\n  \"password\": \"Asdf123!\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Verify OTP",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const data = pm.response.json();",
+              "  pm.environment.set('access_token', data.access_token);",
+              "}",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{pending_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"otp\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/auth/verify-otp",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "auth", "verify-otp"]
+        }
+      }
+    },
+    {
+      "name": "Employees - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/employees?limit=10&offset=0",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "employees"],
+          "query": [
+            {"key": "limit", "value": "10"},
+            {"key": "offset", "value": "0"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Employees - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+          {"key": "Content-Type", "value": "application/json", "type": "text"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Mr\",\n  \"first_name\": \"New\",\n  \"middle_name\": null,\n  \"last_name\": \"Employee\",\n  \"date_of_birth\": \"1990-01-01\",\n  \"internal_note\": \"Created via Postman\",\n  \"hire_date\": \"2024-01-01\",\n  \"status\": \"active\",\n  \"email\": \"new.employee@example.com\",\n  \"phone\": \"+1-555-0100\",\n  \"department\": \"Engineering\",\n  \"job_title\": \"QA Engineer\",\n  \"employee_code\": \"EMP-9999\",\n  \"address\": \"123 Demo Street\",\n  \"emergency_contact_name\": \"Demo Contact\",\n  \"emergency_contact_phone\": \"+1-555-0999\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/employees",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "employees"]
+        }
+      }
+    },
+    {
+      "name": "Employees - Update",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"},
+          {"key": "Content-Type", "value": "application/json", "type": "text"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"department\": \"Support\",\n  \"status\": \"inactive\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/employees/{{employee_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "employees", "{{employee_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Employees - Activate",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/employees/{{employee_id}}/activate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "employees", "{{employee_id}}", "activate"]
+        }
+      }
+    },
+    {
+      "name": "Employees - Deactivate",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/employees/{{employee_id}}/deactivate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "employees", "{{employee_id}}", "deactivate"]
+        }
+      }
+    },
+    {
+      "name": "Users - List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{access_token}}", "type": "text"}
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/users?limit=10&offset=0",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "users"],
+          "query": [
+            {"key": "limit", "value": "10"},
+            {"key": "offset", "value": "0"}
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "employee_id", "value": ""}
+  ]
+}
