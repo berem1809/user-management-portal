@@ -11,11 +11,14 @@ import {
   Card, 
   CardContent,
   Alert,
-  Snackbar
+  Snackbar,
+  InputAdornment
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { verifyOtpThunk, clearError } from '@/store/slices/authSlice';
@@ -76,21 +79,35 @@ export default function OtpPage() {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #E0E7FF 0%, #D1FAE5 100%)',
+        background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #C7D2FE 100%)',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Container component="main" maxWidth="xs">
+      {/* Decorative background blobs */}
+      <Box sx={{
+        position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
+        background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 70%)',
+        borderRadius: '50%',
+      }} />
+      <Box sx={{
+        position: 'absolute', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw',
+        background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0) 70%)',
+        borderRadius: '50%',
+      }} />
+
+      <Container component="main" maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
         <Card 
           sx={{ 
             width: '100%', 
-            background: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+            background: 'rgba(255, 255, 255, 0.7)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.5)',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            borderRadius: '24px',
           }}
         >
-          <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
+          <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
             <Box
               sx={{
                 display: 'flex',
@@ -98,7 +115,17 @@ export default function OtpPage() {
                 alignItems: 'center',
               }}
             >
-              <Typography component="h1" variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }} gutterBottom>
+              <Box 
+                sx={{ 
+                  width: 56, height: 56, mb: 2, 
+                  background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+                  borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(16, 185, 129, 0.25)'
+                }}
+              >
+                <SecurityOutlinedIcon sx={{ color: 'white', fontSize: 32 }} />
+              </Box>
+              <Typography component="h1" variant="h4" sx={{ fontWeight: 800, color: 'text.primary', textAlign: 'center' }} gutterBottom>
                 Two-Factor Auth
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
@@ -106,7 +133,7 @@ export default function OtpPage() {
               </Typography>
 
               {error && (
-                <Alert severity="error" sx={{ width: '100%', mb: 3 }}>
+                <Alert severity="error" sx={{ width: '100%', mb: 3, borderRadius: '12px' }}>
                   {error}
                 </Alert>
               )}
@@ -122,12 +149,22 @@ export default function OtpPage() {
                   {...register('otp')}
                   error={!!errors.otp}
                   helperText={errors.otp?.message as string | undefined}
-                  slotProps={{ htmlInput: { maxLength: 6 } }}
+                  slotProps={{ 
+                    htmlInput: { maxLength: 6, style: { textAlign: 'center', letterSpacing: '0.5em', fontSize: '1.25rem', fontWeight: 700 } },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <VpnKeyOutlinedIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }
+                  }}
                 />
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
+                  color="secondary"
                   size="large"
                   disabled={loading}
                   sx={{ mt: 4, mb: 1, py: 1.5, fontSize: '1rem' }}
@@ -143,7 +180,7 @@ export default function OtpPage() {
         open={showSuccess} 
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity="success" sx={{ width: '100%', boxShadow: 3 }}>
+        <Alert severity="success" sx={{ width: '100%', boxShadow: 3, borderRadius: '12px' }}>
           OTP Verified! Redirecting to Dashboard...
         </Alert>
       </Snackbar>

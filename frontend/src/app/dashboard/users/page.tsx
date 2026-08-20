@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   Button, 
@@ -19,20 +19,21 @@ import {
   IconButton,
   Tooltip,
   CircularProgress,
-  Dialog
+  Dialog,
+  Avatar
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import AddIcon from '@mui/icons-material/Add';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import ToggleOnRoundedIcon from '@mui/icons-material/ToggleOnRounded';
+import ToggleOffRoundedIcon from '@mui/icons-material/ToggleOffRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchUsersThunk, setPage, setLimit, setSearch } from '@/store/slices/userSlice';
 import { User } from '@/types';
 
-// We will build these components in the next step
 import UserFormModal from '@/components/users/UserFormModal';
 import ConfirmationModal from '@/components/common/ConfirmationModal';
 
@@ -50,16 +51,14 @@ export default function UsersPage() {
   const [statusUser, setStatusUser] = useState<User | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Fetch users when pagination or search changes
   useEffect(() => {
     dispatch(fetchUsersThunk());
   }, [dispatch, page, limit, search]);
 
-  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       dispatch(setSearch(searchInput));
-    }, 500); // 500ms debounce
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchInput, dispatch]);
 
@@ -86,77 +85,87 @@ export default function UsersPage() {
     setIsConfirmOpen(true);
   };
 
+  const stringAvatar = (firstName: string, lastName: string) => {
+    return `${firstName[0]}${lastName[0]}`;
+  };
+
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
+      {/* Header Section */}
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
-            Users Management
+          <Typography variant="h3" sx={{ fontWeight: 800, color: 'text.primary', mb: 1, letterSpacing: '-0.03em' }}>
+            Team Members
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage your team members and their account permissions here.
+          <Typography variant="body1" color="text.secondary">
+            Manage your organization's users, their roles, and system access.
           </Typography>
         </Box>
         <Button 
           variant="contained" 
-          startIcon={<AddIcon />}
+          startIcon={<AddRoundedIcon />}
           onClick={handleOpenCreate}
           size="large"
           sx={{ py: 1.5, px: 3 }}
         >
-          Create User
+          Add New User
         </Button>
       </Box>
 
-      <Card sx={{ mb: 4, p: 2, display: 'flex', alignItems: 'center' }}>
+      {/* Toolbar Section */}
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
         <TextField
           fullWidth
-          placeholder="Search by name, email, or employee code..."
+          placeholder="Search users by name, email, or code..."
           variant="outlined"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          sx={{ maxWidth: 600 }}
+          sx={{ maxWidth: 480 }}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="action" />
+                  <SearchRoundedIcon color="action" />
                 </InputAdornment>
               ),
             }
           }}
         />
-      </Card>
+      </Box>
 
-      <Card>
+      {/* Data Table Section */}
+      <Card sx={{ overflow: 'hidden' }}>
         <TableContainer>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead sx={{ bgcolor: 'background.default' }}>
+          <Table sx={{ minWidth: 700 }}>
+            <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>Code</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>Status</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600, color: 'text.secondary' }}>Actions</TableCell>
+                <TableCell>Employee</TableCell>
+                <TableCell>Code</TableCell>
+                <TableCell>Email Address</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading && users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                    <CircularProgress />
+                  <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
+                    <CircularProgress size={48} thickness={4} />
+                    <Typography sx={{ mt: 2, color: 'text.secondary', fontWeight: 500 }}>Loading team members...</Typography>
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
-                      <SearchIcon sx={{ fontSize: 48, mb: 2 }} color="action" />
-                      <Typography variant="h6" color="text.secondary">
+                  <TableCell colSpan={5} align="center" sx={{ py: 12 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.8 }}>
+                      <Box sx={{ width: 80, height: 80, borderRadius: '24px', bgcolor: 'rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                        <ErrorOutlineRoundedIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+                      </Box>
+                      <Typography variant="h6" color="text.primary" sx={{ mb: 1, fontWeight: 700 }}>
                         No users found
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Try adjusting your search filters or create a new user.
+                      <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 300, textAlign: 'center' }}>
+                        We couldn't find anyone matching that search. Try adjusting your filters.
                       </Typography>
                     </Box>
                   </TableCell>
@@ -166,38 +175,72 @@ export default function UsersPage() {
                   <TableRow 
                     key={user.id} 
                     hover
-                    sx={{ transition: 'background-color 0.2s ease' }}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
-                    <TableCell sx={{ fontWeight: 500, color: 'text.secondary' }}>{user.employee_code}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>{`${user.first_name} ${user.last_name}`}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar 
+                          sx={{ 
+                            bgcolor: 'primary.light', 
+                            color: 'white', 
+                            fontWeight: 700,
+                            width: 40, 
+                            height: 40
+                          }}
+                        >
+                          {stringAvatar(user.first_name, user.last_name)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                            {`${user.first_name} ${user.last_name}`}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.04)', px: 1, py: 0.5, borderRadius: 1, display: 'inline-block' }}>
+                        {user.employee_code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {user.email}
+                      </Typography>
+                    </TableCell>
                     <TableCell>
                       <Chip 
-                        label={user.status.toUpperCase()} 
-                        size="small"
+                        label={user.status === 'active' ? 'Active' : 'Inactive'} 
+                        icon={<Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: user.status === 'active' ? '#059669' : '#475569', ml: 1 }} />}
                         sx={{ 
                           fontWeight: 700, 
                           fontSize: '0.75rem',
-                          borderRadius: '6px',
+                          height: 28,
                           ...(user.status === 'active' 
-                            ? { bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#059669' } 
-                            : { bgcolor: 'rgba(100, 116, 139, 0.1)', color: '#475569' }
+                            ? { bgcolor: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' } 
+                            : { bgcolor: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0' }
                           )
                         }}
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Edit User">
-                        <IconButton onClick={() => handleOpenEdit(user)} color="primary">
-                          <EditIcon />
+                      <Tooltip title="Edit Profile">
+                        <IconButton onClick={() => handleOpenEdit(user)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main', bgcolor: 'primary.50' } }}>
+                          <EditRoundedIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title={user.status === 'active' ? 'Deactivate' : 'Activate'}>
+                      <Tooltip title={user.status === 'active' ? 'Deactivate Access' : 'Restore Access'}>
                         <IconButton 
                           onClick={() => handleOpenStatus(user)} 
-                          color={user.status === 'active' ? 'error' : 'success'}
+                          sx={{ 
+                            ml: 1,
+                            color: user.status === 'active' ? 'error.light' : 'success.light',
+                            '&:hover': { 
+                              color: user.status === 'active' ? 'error.main' : 'success.main', 
+                              bgcolor: user.status === 'active' ? 'error.50' : 'success.50' 
+                            }
+                          }}
                         >
-                          {user.status === 'active' ? <ToggleOnIcon /> : <ToggleOffIcon />}
+                          {user.status === 'active' ? <ToggleOnRoundedIcon /> : <ToggleOffRoundedIcon />}
                         </IconButton>
                       </Tooltip>
                     </TableCell>
@@ -207,15 +250,23 @@ export default function UsersPage() {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={total}
-          rowsPerPage={limit}
-          page={page}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleLimitChange}
-        />
+        <Box sx={{ borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={total}
+            rowsPerPage={limit}
+            page={page}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleLimitChange}
+            sx={{
+              '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                color: 'text.secondary',
+                fontWeight: 500,
+              }
+            }}
+          />
+        </Box>
       </Card>
 
       {isFormOpen && (
@@ -244,21 +295,26 @@ export default function UsersPage() {
         slotProps={{
           paper: {
             sx: {
-              borderRadius: 3,
-              p: { xs: 2, sm: 3 },
+              borderRadius: '24px',
+              p: { xs: 3, sm: 4 },
               textAlign: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             }
           }
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <CheckCircleOutlineIcon color="success" sx={{ fontSize: 64 }} />
+        <Box sx={{ 
+          width: 80, height: 80, mb: 3, 
+          borderRadius: '50%', bgcolor: '#ECFDF5', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center' 
+        }}>
+          <CheckCircleRoundedIcon sx={{ fontSize: 48, color: '#10B981' }} />
         </Box>
-        <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: 'text.primary' }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, mb: 1.5, color: 'text.primary', letterSpacing: '-0.02em' }}>
           Success!
         </Typography>
-        <Typography color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, px: 2 }}>
           {successMsg}
         </Typography>
         <Button 
@@ -266,9 +322,10 @@ export default function UsersPage() {
           onClick={() => setSuccessMsg(null)}
           fullWidth
           size="large"
-          sx={{ py: 1.5, borderRadius: 2 }}
+          color="secondary"
+          sx={{ py: 1.5, fontSize: '1rem' }}
         >
-          Awesome, got it!
+          Done
         </Button>
       </Dialog>
     </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -9,12 +9,14 @@ import {
   Box,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Typography,
+  IconButton
 } from '@mui/material';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 import { useAppDispatch } from '@/store/hooks';
 import { createUserThunk, updateUserThunk } from '@/store/slices/userSlice';
@@ -24,10 +26,9 @@ interface UserFormModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: (message: string) => void;
-  user?: User | null; // If user is provided, it's Edit mode. Otherwise Create mode.
+  user?: User | null;
 }
 
-// Yup schema for validation
 const schema = yup.object({
   first_name: yup.string().required('First name is required'),
   last_name: yup.string().required('Last name is required'),
@@ -65,7 +66,6 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
     }
   });
 
-  // Populate form when in edit mode
   useEffect(() => {
     if (user && open) {
       reset({
@@ -78,7 +78,6 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
         hire_date: user.hire_date || '',
       });
     } else if (open) {
-      // Clear form when opening in create mode
       reset({
         first_name: '',
         last_name: '',
@@ -95,18 +94,16 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
     setErrorMsg(null);
     try {
       if (isEdit && user) {
-        // We dispatch the action and unwrap it so we can catch errors here directly if needed
         await dispatch(updateUserThunk({ id: user.id, data })).unwrap();
-        if (onSuccess) onSuccess('User updated successfully');
+        if (onSuccess) onSuccess('User profile has been successfully updated.');
       } else {
         await dispatch(createUserThunk(data)).unwrap();
-        if (onSuccess) onSuccess('User created successfully');
+        if (onSuccess) onSuccess('New user has been successfully provisioned.');
       }
-      onClose(); // Close modal on success
+      onClose();
     } catch (err: any) {
       let errorMessage = 'An unexpected error occurred.';
       if (Array.isArray(err)) {
-        // FastAPI returns an array of validation errors like { loc: [...], msg: "..." }
         errorMessage = err.map(e => {
           const field = e.loc?.[e.loc.length - 1];
           const friendlyField = field 
@@ -114,7 +111,6 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
             : '';
           
           let msg = e.msg;
-          // Simplify common Pydantic errors
           if (msg.includes('value is not a valid email address')) {
             msg = 'Please provide a valid email address.';
           } else if (msg === 'Field required') {
@@ -133,11 +129,37 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{isEdit ? 'Edit User' : 'Create New User'}</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: '24px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          }
+        }
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 3, pb: 2 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.02em' }}>
+            {isEdit ? 'Edit Team Member' : 'Provision New User'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {isEdit ? 'Update the details for this employee.' : 'Add a new member to the organization.'}
+          </Typography>
+        </Box>
+        <IconButton onClick={onClose} sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' } }}>
+          <CloseRoundedIcon />
+        </IconButton>
+      </Box>
+
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogContent dividers>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <DialogContent sx={{ p: 3, pt: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 fullWidth
@@ -162,20 +184,22 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
               error={!!errors.email}
               helperText={errors.email?.message}
             />
-            <TextField
-              fullWidth
-              label="Employee Code"
-              {...register('employee_code')}
-              error={!!errors.employee_code}
-              helperText={errors.employee_code?.message}
-            />
-            <TextField
-              fullWidth
-              label="Job Title"
-              {...register('title')}
-              error={!!errors.title}
-              helperText={errors.title?.message}
-            />
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Employee Code"
+                {...register('employee_code')}
+                error={!!errors.employee_code}
+                helperText={errors.employee_code?.message}
+              />
+              <TextField
+                fullWidth
+                label="Job Title"
+                {...register('title')}
+                error={!!errors.title}
+                helperText={errors.title?.message}
+              />
+            </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 fullWidth
@@ -198,23 +222,31 @@ export default function UserFormModal({ open, onClose, onSuccess, user }: UserFo
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+        <DialogActions sx={{ p: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button 
+            onClick={onClose} 
+            disabled={isSubmitting}
+            color="inherit"
+            sx={{ color: 'text.secondary', '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' } }}
+          >
+            Cancel
+          </Button>
           <Button 
             type="submit" 
             variant="contained" 
             disabled={isSubmitting}
-            startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
+            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
+            sx={{ minWidth: 120 }}
           >
             {isSubmitting 
               ? (isEdit ? 'Saving...' : 'Creating...') 
-              : (isEdit ? 'Save Changes' : 'Create')}
+              : (isEdit ? 'Save Changes' : 'Provision User')}
           </Button>
         </DialogActions>
       </form>
       
-      <Snackbar open={!!errorMsg} autoHideDuration={6000} onClose={() => setErrorMsg(null)}>
-        <Alert onClose={() => setErrorMsg(null)} severity="error" sx={{ width: '100%' }}>
+      <Snackbar open={!!errorMsg} autoHideDuration={6000} onClose={() => setErrorMsg(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert onClose={() => setErrorMsg(null)} severity="error" sx={{ width: '100%', borderRadius: '12px', boxShadow: 3 }}>
           {errorMsg}
         </Alert>
       </Snackbar>
