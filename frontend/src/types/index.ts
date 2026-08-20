@@ -1,5 +1,5 @@
 export interface User {
-  id: string; // Assuming UUID, or could be a number
+  id: string;
   employee_code: string;
   first_name: string;
   last_name: string;

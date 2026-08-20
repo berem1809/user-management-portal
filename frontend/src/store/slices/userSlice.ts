@@ -31,7 +31,7 @@ export const fetchUsersThunk = createAsyncThunk(
       const state = getState() as { users: UserState };
       const { page, limit, search } = state.users;
       const offset = page * limit;
-      
+
       const response = await api.get<PaginatedResponse<User>>('/employees', {
         params: {
           limit,
@@ -125,14 +125,13 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Create User
       .addCase(createUserThunk.fulfilled, (state, action) => {
-        // Just prepend to list, though typically you might want to refetch for true ordering
         state.users.unshift(action.payload);
         state.total += 1;
       })
-      
+
       // Update User
       .addCase(updateUserThunk.fulfilled, (state, action) => {
         const index = state.users.findIndex(u => u.id === action.payload.id);
@@ -140,7 +139,7 @@ const userSlice = createSlice({
           state.users[index] = action.payload;
         }
       })
-      
+
       // Change Status
       .addCase(changeUserStatusThunk.fulfilled, (state, action) => {
         const index = state.users.findIndex(u => u.id === action.payload.id);

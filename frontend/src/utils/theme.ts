@@ -4,27 +4,27 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#4F46E5', // Indigo 600
-      light: '#6366F1', // Indigo 500
-      dark: '#4338CA',  // Indigo 700
+      main: '#4F46E5',
+      light: '#6366F1',
+      dark: '#4338CA',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#10B981', // Emerald 500
+      main: '#10B981',
       light: '#34D399',
       dark: '#059669',
       contrastText: '#ffffff',
     },
     background: {
-      default: '#F8FAFC', // Slate 50
+      default: '#F8FAFC',
       paper: '#FFFFFF',
     },
     text: {
-      primary: '#0F172A', // Slate 900
-      secondary: '#475569', // Slate 600
+      primary: '#0F172A',
+      secondary: '#475569',
     },
     error: {
-      main: '#EF4444', // Red 500
+      main: '#EF4444',
       light: '#F87171',
     },
     success: {
@@ -46,11 +46,11 @@ const theme = createTheme({
       letterSpacing: '0.01em',
     },
     body1: {
-      color: '#334155', // Slate 700
+      color: '#334155',
       lineHeight: 1.6,
     },
     body2: {
-      color: '#475569', // Slate 600
+      color: '#475569',
       lineHeight: 1.5,
     }
   },
